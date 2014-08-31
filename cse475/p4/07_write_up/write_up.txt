@@ -1,0 +1,116 @@
+Task#7: Write-Up
+I have done my test on the Sunlab machine "mars". All of my test cases passed the verification. 
+In my following description, 1 is 01_pthread, 2 is 02_rwlock, 3 is 03_spin, 4 is 04_tas_eb,
+5 is 05_hand_over and 6 is 06_lazy.
+
+
+>
+First, to test the effects of the change of thread counts, I designed a test in which I fixed both
+the key ranges (m=256) and lookup ratios (r=34%), then I got the following results (time in 'ns'):
+p=1, m=256, r=34
+1. csv, R=34, d=1, p=1, m=256, ops=5764407, time=1000002088, throughput=5764394
+2. csv, R=34, d=1, p=1, m=256, ops=4898037, time=1000003681, throughput=4898018
+3. csv, R=34, d=1, p=1, m=256, ops=5953983, time=1000001974, throughput=5953971
+4. csv, R=34, d=1, p=1, m=256, ops=6523494, time=1000002367, throughput=6523478
+5. csv, R=34, d=1, p=1, m=256, ops=1785049, time=1000001873, throughput=1785045
+6. csv, R=34, d=1, p=1, m=256, ops=6450588, time=1000007380, throughput=6450540
+p=2, m=256, r=34
+1. csv, R=34, d=1, p=2, m=256, ops=2130098, time=1000005793, throughput=2130085
+2. csv, R=34, d=1, p=2, m=256, ops=1105274, time=1000003393, throughput=1105270
+3. csv, R=34, d=1, p=2, m=256, ops=2487253, time=1000002558, throughput=2487246
+4. csv, R=34, d=1, p=2, m=256, ops=4770906, time=1000004243, throughput=4770885
+5. csv, R=34, d=1, p=2, m=256, ops=1006906, time=1000003598, throughput=1006902
+6. csv, R=34, d=1, p=2, m=256, ops=6148422, time=1000006734, throughput=6148380
+p=4, m=256, r=34
+1. csv, R=34, d=1, p=4, m=256, ops=1664332, time=1000013137, throughput=1664310
+2. csv, R=34, d=1, p=4, m=256, ops=480138, time=1000012893, throughput=480131
+3. csv, R=34, d=1, p=4, m=256, ops=1975931, time=1000002865, throughput=1975925
+4. csv, R=34, d=1, p=4, m=256, ops=4031005, time=1000002816, throughput=4030993
+5. csv, R=34, d=1, p=4, m=256, ops=1298585, time=1000002843, throughput=1298581
+6. csv, R=34, d=1, p=4, m=256, ops=9091682, time=1000008509, throughput=9091604
+
+1) We can see that with the increase of thread counts, the operation counts and throughput of task#1,
+task#2, task#3 and task#4 decrease very obviously. In my opinion, it is because these four kinds of
+locks lock the whole link for operations, which means other threads are not able to manipulate any
+elements in this linklist if it is locked by a certain thread. This mechanism becomes worse when the 
+thread counts increase. Other threads have to yield or wait when one thread occupies the lock of the
+linklist, which will definitely reduce the comprehensive operation counts.
+2) However, for task#5 and task#6 which implement more optimized locking mechanisms that allow multiple
+operations on one linklist, the operation counts and throughput appear more stable. Their locking ideas 
+focus on the locking of a few elements without influencing the whole linklist. So compared to the large
+number of operation counts, the impact to "ops" of the increase of thread counts from 1 to 4 is trivial.
+
+
+>
+Second, to test the effects of the change of key ranges, I designed a test in which I fixed both
+the thread count (p=4) and lookup ratios (r=34%), then I got the following results (time in 'ns'):
+p=4, m=128, r=34
+1. csv, R=34, d=1, p=4, m=128, ops=1931224, time=1000010261, throughput=1931204
+2. csv, R=34, d=1, p=4, m=128, ops=551336, time=1000013680, throughput=551328
+3. csv, R=34, d=1, p=4, m=128, ops=3503155, time=1000002643, throughput=3503145
+4. csv, R=34, d=1, p=4, m=128, ops=5502249, time=1000003404, throughput=5502230
+5. csv, R=34, d=1, p=4, m=128, ops=2208518, time=1000003544, throughput=2208510
+6. csv, R=34, d=1, p=4, m=128, ops=11779738, time=1000007463, throughput=11779650
+p=4, m=256, r=34
+1. csv, R=34, d=1, p=4, m=256, ops=1664332, time=1000013137, throughput=1664310
+2. csv, R=34, d=1, p=4, m=256, ops=480138, time=1000012893, throughput=480131
+3. csv, R=34, d=1, p=4, m=256, ops=1975931, time=1000002865, throughput=1975925
+4. csv, R=34, d=1, p=4, m=256, ops=4031005, time=1000002816, throughput=4030993
+5. csv, R=34, d=1, p=4, m=256, ops=1298585, time=1000002843, throughput=1298581
+6. csv, R=34, d=1, p=4, m=256, ops=9091682, time=1000008509, throughput=9091604
+p=4, m=512, r=34
+1. csv, R=34, d=1, p=4, m=512, ops=1201882, time=1000020344, throughput=1201857
+2. csv, R=34, d=1, p=4, m=512, ops=429516, time=1000010419, throughput=429511
+3. csv, R=34, d=1, p=4, m=512, ops=1261032, time=1000006676, throughput=1261023
+4. csv, R=34, d=1, p=4, m=512, ops=2523165, time=1000005672, throughput=2523150
+5. csv, R=34, d=1, p=4, m=512, ops=682143, time=1000010452, throughput=682135
+6. csv, R=34, d=1, p=4, m=512, ops=5210019, time=1000007021, throughput=5209982
+
+We can find that for all tasks, the increase of key ranges will cause the decrease of operations counts and 
+the throughput. This is probably because it requires more time to traverse a larger sized linklist for insert(),
+lookup(), and remove() operations.
+
+
+>
+Third, to test the effects of the change of lookup ratios, I designed a test in which I fixed both
+the thread count (p=4) and key ranges (m=256), then I got the following results (time in 'ns'):
+p=4, m=256, r=34
+1. csv, R=34, d=1, p=4, m=256, ops=1664332, time=1000013137, throughput=1664310
+2. csv, R=34, d=1, p=4, m=256, ops=480138, time=1000012893, throughput=480131
+3. csv, R=34, d=1, p=4, m=256, ops=1975931, time=1000002865, throughput=1975925
+4. csv, R=34, d=1, p=4, m=256, ops=4031005, time=1000002816, throughput=4030993
+5. csv, R=34, d=1, p=4, m=256, ops=1298585, time=1000002843, throughput=1298581
+6. csv, R=34, d=1, p=4, m=256, ops=9091682, time=1000008509, throughput=9091604
+p=4, m=256, r=60
+1. csv, R=60, d=1, p=4, m=256, ops=1649561, time=1000082746, throughput=1649424
+2. csv, R=60, d=1, p=4, m=256, ops=573476, time=1000017566, throughput=573465
+3. csv, R=60, d=1, p=4, m=256, ops=2001778, time=1000002337, throughput=2001773
+4. csv, R=60, d=1, p=4, m=256, ops=3950020, time=1000001967, throughput=3950012
+5. csv, R=60, d=1, p=4, m=256, ops=1239482, time=1000006800, throughput=1239473
+6. csv, R=60, d=1, p=4, m=256, ops=11199593, time=1000007606, throughput=11199507
+p=4, m=256, r=80
+1. csv, R=80, d=1, p=4, m=256, ops=1719666, time=1000007559, throughput=1719653
+2. csv, R=80, d=1, p=4, m=256, ops=810947, time=1000018924, throughput=810931
+3. csv, R=80, d=1, p=4, m=256, ops=2274152, time=1000004491, throughput=2274141
+4. csv, R=80, d=1, p=4, m=256, ops=4105543, time=1000002912, throughput=4105531
+5. csv, R=80, d=1, p=4, m=256, ops=1251533, time=1000006390, throughput=1251525
+6. csv, R=80, d=1, p=4, m=256, ops=12374796, time=1000006898, throughput=12374710
+
+We can see that the increase of lookup ratios increases the operation counts and throughput for all locking 
+mechanisms. I think it is because the lookup operation is lighter and faster. Compared to lookup, both insert 
+and remove operations need to change the linklist, then they may consume more time. 
+
+
+>
+Other Experience and Conclusions:
+1. Among task#1, task#2, task#3 and task#4, which are all locks on a single linklist, I think No.4 - the exponential 
+backoff lock - has the best performance. It alleviates the traffic jam of bus traffic by decreasing the number of
+attempts to acquire a lock. Compared to the naive spin lock, it performs better.
+2. Between task#5 and task#6, I think the lazy optimistic synchronization is dramatically better than hand-over-hand
+locking in almost all test cases I have tested. This is because the hand-over-hand lock imposes a potentially long 
+sequence of locks over the linklist which might block other threads searching for later nodes.
+3. I don't have a chance to really manage the memory for task#6. I just notice the necessity but find it is not easy
+to do it. In Java, the implementation relies on the garbage collection which may not recycle the node if it is being
+traversed. In C++, we should also consider this problem.
+
+Yi Luo

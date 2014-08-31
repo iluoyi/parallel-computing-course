@@ -1,0 +1,24 @@
+Please use this file to store your answers to the following three questions:
+
+1.  In map_t.cpp, why do we need the line:
+    template class map_t<int, int>;
+Answer:
+This is very essential for successful compiling. 
+Because map_t.cpp and tests.cpp are compiled in separate compiling process. But tests.cpp always attempts 
+to call functions that are in fact implemented in map_t.cpp. This will cause error since the compiler
+doesn't know the complete methods and functions in map_t.cpp. The error is like "undefined reference to ...".
+To solve it, we add a line "template class map_t<int, int>;" in the end of map_t.cpp to do explicit instantiation.
+Then the compiler will compile such instantiation.
+I've also tried another way to solve this problem. I included the implementation of map_t (map_t.cpp) in the 
+tests.cpp and commented out the line "template class map_t<int, int>;". I still successfully compiled them.
+
+2.  In p1.cpp, why is the parameter cfg passed by reference?
+Answer:
+Because the parseargs() function will directly change the value of the cfg. If cfg is not passed by reference,
+the parseargs() function will get a copy of cfg and just change values of the copy. This will not influence the 
+original cfg, which is not what we want here.
+
+3.  In config_t.hpp, what is the only difference between a struct and a class
+    in C++?
+Answer:
+In a struct, all of its members and functions are public. But in a class, we can make some of them private.

@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}
+
+\bibitem{ghemawat2003google}
+Shun-Tak~Leung Sanjay~Ghemawat, Howard~Gobioff.
+\newblock {The Google File System}.
+\newblock {\em {SOSP}}, 2003.
+
+\bibitem{howGFSworks}
+Jonathan Strickland.
+\newblock {How the Google File System Works}.
+\newblock {\em {How Stuff Works}}, 2008.
+
+\end{thebibliography}

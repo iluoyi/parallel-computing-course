@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}
+
+\bibitem{AMP}
+Nir~Shavit Maurice~Herlihy.
+\newblock {The Art of Multiprocessor Programming}.
+\newblock {\em {Chapter 3}}, 2012.
+
+\bibitem{herlihyLACCCO1990}
+Jeannette M.~Wing Maurice P.~Herlihy.
+\newblock {Linearizability: A Correctness Condition for Concurrent Objects}.
+\newblock {\em {ACM Transactions on Programming Languages and Systems}}, 1990.
+
+\end{thebibliography}

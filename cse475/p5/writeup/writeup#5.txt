@@ -1,0 +1,193 @@
+**************************************************************************
+	Course:			CSE475 Parallel Computing
+	Assignment:		Write-up for Assignment 5
+	Date:			12-13-2013
+	Instructor:		Prof. Spear
+	Author:			Jundong Yao		Yi Luo
+**************************************************************************
+This is the write-up for assignment #5.
+In this Assignment, we are required to explore transactional memory. We will do our experiment using linked list, balanced search tree (our own implementation of Red-Black Tree), simple hash table, and resizable hash table. 
+
+Q1. How does your linked list compare, in terms of latency and throughput, to the lists you developed in project 4? Why?
+	
+	Analysis: (test in parameters: lookup ratio = 34, duration = 1, elements = 256)
+		Threads:
+		---------------------------------------------------
+		Transactional:
+		ThreadsNo	throughput	latency(in 1000ops)
+		2			744410		1343345
+		3			1056656		946381
+		4			1136972		879529
+		----------------------------------------------------
+		Lock:	(pthread)
+		ThreadNo	throughput	latency	(in 1000ops)
+		2			1237797		807886
+		3			976881		1023666
+		4			1017118		983170
+		
+		Lock:	(rwlock)
+		ThreadNo	throughput	latency(in 1000ops)
+		2			617386		1619732
+		3			474282		2108450
+		4			315653		3168035
+		
+		Lock:	(spinLock)
+		ThreadNo	throughput	latency(in 1000ops)
+		2			3428837		291644
+		3			2715793		368216
+		4			2402585		416218
+		
+		Lock:	(tas_eb)
+		ThreadNo	throughput	latency(in 1000ops)
+		2			4457981		224316
+		3			4540724		220229
+		4			4400320		227256
+		
+		Lock:	(hand_over)
+		ThreadNo	throughput	latency(in 1000ops)
+		2			987895		1012253
+		3			1109823		901044
+		4			1226654		815225
+		
+		Lock:	(lazy)
+		ThreadNo	throughput	latency(in 1000ops)
+		2			6077498		164541
+		3			7138193		140091
+		4			8214567		121734
+		----------------------------------------------------
+		
+		As we can see in the above table, the transaction code is only better than simple lock(task1) and read&write lock(task2). The thoughtput of transactional method is larger than (or at least close to) these simple locks. However, the transactional liked list does not beat other optimized locks. Especially compared to the lazy synchronization, the transaction mechanism has poor performance. 
+		It is because these locks were optimized based on the specific data structure of linkedlist. But the trasanctional memeory is a general method for concurrent programming. In the code, we need to make a block of code transactional if we think they are concurrency problems, namely, we need to do transactional executions in lookup, insert and remove functions. During these actions, the thread needs to find the desired node, which makes the whole block transactional. It is a big time consuming procedure if these functions are invoked frequently, which means many blocks need to be executed in the transactional way - the way in sequential. Therefore, the transactional linked list is supposed to be weaker than the optimized lock mechanisms in project 4.
+		
+Q2. Does your balanced tree scale well? Are you able to identify any bottlenecks in the GCC TM implementation?
+	
+	This experiment was made on the Sunlab machine "Mars" (4 cores).
+	--------------------------------------
+	| NumOfThreads	throughput	latency	|
+	| 1				7474714		133784	|
+	| 2				2018880		495324	|
+	| 3				2221004		450246	|
+	| 4				2266379		441232	|
+	| 5				2147712		465611	|
+	| 6				2017926		495558	|
+	| 7				2002954		499262	|
+	| 8				1647907		606830	|
+	--------------------------------------
+	
+	As we can see in the above table, the throughput grows slightly from thread 2 to 4, and decreases from thread 5. But generally speaking, this is not a big change. It seems our red-black tree scales well on this machine.	Then we did another experiment on "titania".
+	-----------------------------
+	| NumOfThreads	throughput	|
+	| 1				7268017		|
+	| 2				2049529		|
+	| 3				2218284		|
+	| 4				1933117		|
+	| 5				1896475		|
+	| 6				1662057		|
+	| 7				1172801		|
+	| 8				735605		|
+	| 9				679108		|
+	| 10			544562		|
+	-----------------------------
+	
+	We can see that when the number of threads grows, the throughput actually decreases. We believe the one of the bottleneck lies the transactional code. The frequency of contention just grows when there are more threads working concurrently. The transaction code do not have the mechanism like the back-off to avoid large amount of contention. We can use transaction_relaxed mechanism but it is not similar with back-off. Overall, the balanced tree does not scale well due to the bottleneck.
+	
+Q3. Compare the performance of your simple hash table to your previous data structures. How is throughput? Latency? Again, do you observe bottlenecks? Be sure to vary the read/write ratio and key range.
+	This experiment is made in Sunlab machine Mars.
+	All tests are using 4 threads.
+	------------------------------------------------
+	ratio = 20, elements = 256
+		Structure		throughput	latency
+		Linked List		1046234		955809		
+		BalancedTree	1919854		520872
+		HashTable		5828299		171576
+		
+	ratio = 20, elements = 512
+		Structure		throughput	latency
+		Linked List		569101		1757157	
+		BalancedTree	1939600		515570
+		HashTable		5525161		180990
+
+	ratio = 20, elements = 1024
+		Structure		throughput	latency
+		Linked List		297933		3356459	
+		BalancedTree	1983468		504167
+		HashTable		6059918		165018
+	------------------------------------------------
+	ratio = 50, elements = 256
+		Structure		throughput	latency
+		Linked List		1372158		728779		
+		BalancedTree	2907141		343980
+		HashTable		8895908		112411
+
+	ratio = 50, elements = 512
+		Structure		throughput	latency
+		Linked List		763427		1309882		
+		BalancedTree	2872033		348185
+		HashTable		9010071		110986
+
+	ratio = 50, elements = 1024
+		Structure		throughput	latency
+		Linked List		387673		2579493		
+		BalancedTree	3112466		321288
+		HashTable		9350103		106950
+	------------------------------------------------
+	ratio = 80, elements = 256
+		Structure		throughput	latency
+		Linked List		1827273		547263		
+		BalancedTree	5656524		176787
+		HashTable		20499958	48780	
+
+	ratio = 80, elements = 512
+		Structure		throughput	latency
+		Linked List		996639		1003372		
+		BalancedTree	5415736		184647
+		HashTable		20627632	48478	
+
+	ratio = 80, elements = 1024
+		Structure		throughput	latency
+		Linked List		506392		1974754		
+		BalancedTree	5593495		178779
+		HashTable		21303568	46940	
+	------------------------------------------------
+	As we can see in the above tables, we can observe that Linked List and Balanced Tree will have decrease tendency in their throughput when their elements are increasing. Also their latency will be effected to be larger. For the increasing of lookup ratio, Linked List and Balanced Tree will have increase tendency in their throughput, also, their latency is smaller and smaller.
+	
+	But for Hash Table, we can observe that with the increasing of elements, Hash Table will have higher throughput and lower latency. Moreover, Hash Table also share the characteristics that its throughput will increase if the lookup ratio is bigger. It is amazing that Hash Table does so well in our implementation. because it has low latency and high throughput, which are not at the same level compared to Linked List and Balanced Tree structure.
+	
+	With the increase of lookup ratio, hash table reveals high performance in reading data, which is much better than Linked List and Balanced Tree. So we can observe the bottleneck in Linked List and RB Tree that their lookup is not so efficient. Compared to the lookup efficiency in Linked List's O(n2), and RB Tree's O(logn), with the Hash Table's O(1).
+	
+Q4. Describe the difference in performance and complexity for the resizable and regular hash tables. Contrast the development effort to that of building a scalable lock-based resizable hash table. Also discuss whether you observed any starvation in resize operations.
+	This experiment is made in Sunlab machine Mars.
+	-------------------------------------------------
+	In Simple Hash Table (threads = 4)
+		NumOfElement	throughput	latency
+		256				6901456		144896
+		2048			6903176		144860
+	-------------------------------------------------
+	In Resizable Hash Table (threads = 4)
+		NumOfElement	throughput	latency
+		256				4614938		216687
+		2048			4601608		217315
+	---------------------------------------------------
+	As we can see in the above table, the simple hash table performs better than the resizable one in this experiment because it has a better throughput. Ideally, for a hashtable, its lookup, insertion and remove funciton have the time complexity of O(1). However, for the simple hash table, because it keeps attaching elements onto the list in a bucket. The list grows when there are too many elements. As a result, when the number of elements becomes really large, the performance of the simple hash table will dramatically reduce. As for the resizable implementation (which is also a more popular implementation), eventhough the rehash() process requires O(n) time, it doesn't happen that frequently. Especially when the user can estimate the size at beginning, the resizable hash table should be a good choice.
+	However, to build a scalable lock-based resizable hash table can be difficult. It is because of the resize process, i.e. rehash() method. During the rehash process, all other theads have to wait because of the lock, which is really a awful bottleneck of the lock-based implementaion.
+	We failed to notice any starvation during this experiment. We directly uses a very popular hash function which attempts to distribute keys evenly in the hash table. Then the resize() method should be invoked not that frequently. Maybe a poor implementation of hash function will trigger the starvation.	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

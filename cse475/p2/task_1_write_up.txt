@@ -1,0 +1,42 @@
+Task #1: Sequential Ocean - write up
+
+1. Based on the result:
+When running "./p2 -g 4 -v -i1" I got,
+34.679, 32.924, 3.833, 14.903
+20.133, 20.4754, 19.0098, 36.587
+27.801, 27.8682, 21.3416, 46.572
+38.563, 34.025, 3.847, 10.03
+
+Then when running "./p2 -g 4 -v -i2" I got,
+34.679, 32.924, 3.833, 14.903
+20.133, 24.0821, 20.2494, 36.587
+27.801, 26.3022, 23.7277, 46.572
+38.563, 34.025, 3.847, 10.03
+
+When running "./p2 -g 4 -v -i3" I got,
+34.679, 32.924, 3.833, 14.903
+20.133, 24.7381, 21.6958, 36.587
+27.801, 27.1876, 24.1397, 46.572
+38.563, 34.025, 3.847, 10.03
+
+From the above 3 results, I can verify the correctness of my sequential
+implementation.
+1) The edge values remain unchanged.
+2) The grid at (1, 1) has value = 20.4754 when iter = 1. When iter = 2, the 
+value turns to be 24.0821 = (20.4754 + 32.924 + 20.133 + 19.0098 + 27.8682) / 5.
+Then 24.7381 = (24.0821 + 32.924 + 20.2494 + 26.3022 + 20.133) / 5 when iter = 3.
+This is correct since each grid location is updated by averaging the grid 
+value with the values of its four neighbors.
+3) We manually  verify that other non-edge grids have the same change as grid (1, 1).
+
+2. Based on the algorithm:
+Each iteration is done within a for loop structure,
+1) I first check whether this grid is an edge grid.
+2) If it is not an edge grid, then update its value in a copy array. If it is, remain
+unchanged.
+3) Swap pointers of the original array and the copy array.
+
+3. Based on verification of Professor Spear on two test results:
+Last but not the least, I checked my result with Professor Spear. Our results were the same.
+
+Yi Luo

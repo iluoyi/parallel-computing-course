@@ -1,0 +1,62 @@
+%
+%  Origin:  Lehigh CSE Department
+%  Course:  CSE 375/475
+%  Date:    2013-09-01
+%  Version: 1
+%
+%
+%  Description: a basic LaTeX document.  You should use the accompanying
+%  makefile to produce a pdf from this source file.  This file is formatted
+%  such that as long as the Bibliography is not on the first page, students
+%  can be sure that they have produced a sufficient volume of text.  Note
+%  that volume is not the basis for a grade, merely a heuristic for ensuring
+%  that the writing is not overly cursory
+%
+
+%
+% Configure a basic LaTeX document with 10pt font and reasonable margins
+%
+\documentclass[10pt, letterpaper]{article}
+\usepackage{fullpage}
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+
+%
+% Load some useful packages... note that there are many, many, many
+% packages... this is just the tip of the iceberg.
+%
+\usepackage{verbatim, cite, paralist}
+
+%
+% Set up a title
+%
+\title{A Brief Review of ``Hoard: A Scalable Memory Allocator for Multithreaded Applications"}
+\author{Yi Luo}
+\date{} % (empty date)
+
+% start the document, make the title
+\begin{document}
+\maketitle
+
+\section{Summary}
+\label{sec-summary}
+ Traditional serial memory allocators do not scale well for multi-threaded programs because they typically use a single lock to protect the heap, which serializes memory operations and also introduces contention. Besides, most existing concurrent allocators have multiple-heap allocation but cannot solve a number of terrible problems such as false sharing and blowup. All of these disadvantages make such allocators the bottleneck of most current parallel and multi-threaded applications. This paper proposes a scalable memory allocator, named Hoard, to overcome deficiencies of these existing allocators.
+\\Hoard has a novel heap organization which combines one global heap and per-processor heaps with a reasonable discipline. It mainly solves two problems which are false sharing and blowup.
+~\cite{emery2000Hoard}
+
+\section{Merits}
+\label{sec-merits}
+The strategy of Hoard to overcome false sharing is a very good one. The basic fact is that false sharing can never be completely avoided, therefore, a good solution is to reduce the possibility. In parallel applications, false sharing is a terrible problem which may force programs to do a large amount of unnecessary work. Allocators can cause false sharing of heap objects by dividing cache lines into a number of small objects that different processors write.
+\\Hoard uses a multiple-heap structure and superblocks to avoid false sharing. When multiple threads request memory at the same time, their requests can be satisfied from different superblocks because a superblock is always owned by exactly one heap. But Hoard does not completely avoid false sharing since it may move superblocks between two heaps so that they may still share cache lines. This paper claims that superblock transfer is an infrequent event so after all Hoard indeed reduces the opportunity for false sharing.
+
+\section{Drawbacks}
+\label{sec-drawbacks}
+This paper benchmarks a number of popular allocators and reveals that Hoard provides a fast, highly scalable allocator to improve the performance of multi-threaded applications. Its experiments are detailed and convincing and their results also display good solutions of Hoard to overcome problems such as false sharing and blowup. However, there is no discussion on the latency of different allocators which I believe should be a very important evaluation aspect.
+
+\section{Personal Thoughts}
+\label{sec-thoughts}
+In the description of their hashing mechanism which maps thread id's to per-processor heaps, authors actually use extra heaps to handle collisions in some platforms/operating systems. I am curious about whether there is a way to achieve the same goal without the using of extra heaps.
+
+\bibliographystyle{plain}
+\bibliography{cse375}
+\end{document}

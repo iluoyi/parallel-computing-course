@@ -1,0 +1,56 @@
+Task #4: Evaluation
+In have done my test on the sunlab machine "jupiter". Respectively, the AIPlayer of Task#1, Task#2 and
+Task#3 are AIPlayer1 (-a 1), AIPlayer2 (-a 2), and AIPlayer1 (-a 2). The original one keeps unchanged 
+which is AIPlayer (-a 0). I implemented the AI searching with the alpha-beta pruning.
+
+>
+To test the effects of the change of lookahead, I desinged a test in which I fixed the board size to a
+certain number (s = 8) and compare the results of different lookahead depth (l = 1 - 7). I got the following
+table (time in 'ns'):
+				l=1		l=2		l=3			l=4			l=5			l=6			l=7
+AIPlayer1 		649807	2818335	19035204	12037986	30613200	187881015	2630349133
+AIPlayer2		640523	3750462	12963327	7356864		23383969	76104841	867570017
+AIPlayer3		646595	4246427	9731817		7105960		22821287	68004776	764198938
+speedup(1/2)	1.01	0.75	1.47		1.64		1.31		2.47		3.03
+speedup(1/3)	1.00	0.66	1.96		1.69		1.34		2.76		3.44
+
+We can see that the maximum speedup (around 3) I got happened when l=7. The speedup grows when the lookahead
+depth increases. However, I was not able to figure out the stable interval of the speedup due to the runtime 
+became very long when l is large.
+
+>
+To test the effects of the change of boardsize, I designed a test in which I fixed the lookahead depth to a
+certain number (l = 5) and compare the results of different boardsize (s = 4, 6, ..., 12). I got the following
+table (time in 'ns'):
+				s=4		s=6			s=8			s=10		s=12
+AIPlayer1		641332	27439959	34530771	1170306938	3924239903
+AIPlayer2		1657148	21464940	20850732	286231660	1223022847
+AIPlayer3		1566892	22364558	20192021	262520400	1125046954
+speedup(1/2)	0.39	1.28		1.66		4.09		3.21
+speedup(1/2)	0.41	1.23		1.71		4.46		3.49
+
+We can see that the maximum speedup (around 4) I got happened when s=10. The speedup grows when the boardsize
+increases. But when the size becomes larger than 10, the speedup decreases.
+
+>
+Conclusions:
+1. The increase of lookahead and boardsize will both increase the running time. Under such circumstances, our 
+parallelizing approaches turn to be very effective. The maximum speedup I was able to realize is 3 ~ 4 in this
+experiment.
+
+2. I found that fork/join strategy is not hard to implement and the code is easy to write. Compared to the map
+patterns which we need to use parallel_for and Struct/Class to implement, the fork/join makes my coding easier.
+
+3. I don't think fork/join is able to terminate any unfruitful searches or limit the work of the algorithm.
+
+4. I think map+reduce and fork/join+hyperobjects are the most natural way to solve this problem when trying 
+parallelizing approaches. It is because in the experiment, we need to search a tree structure and compare results
+of each branches. Both parallelizing strategies we use here are intuitive and straightforward.
+
+5. In task#1, although I implemented the alpha_beta searching and reduced lots of workload. The algorithm still has
+some drawbacks. For example, the final results deeply depend on the searching order.
+   In task#1,2,3, I failed to provide a more efficient way for backtracking. I mean, I just create temp board each 
+time for the new recursion. This is really a waste of memory. I should implemented an Undo_move() function to cooperate
+with Make_move() function.
+
+Yi Luo

@@ -1,0 +1,48 @@
+**************************************************************************
+	Course:			CSE475 Parallel Computing
+	Assignment:		Write-up for Assignment 5
+	Date:			12-13-2013
+	Instructor:		Prof. Spear
+	Author:			Jundong Yao		Yi Luo
+**************************************************************************
+
+Q1. Contrast the performance of your code from Task #1 with your code from Task #3. You should do this by instantiating your relaxed transaction key/value store using std::string, and your atomic key/value store using your strings, and then running tests of your own design. These tests should be designed to highlight issues related to latency and throughput that relate to the use of strings within transactions.
+	
+	For the design of our code, we still implement the test bench in project 4, and use that bench to do the following experiments.
+	We modified the code we done in task 1 by using std::string and use the atomic key-value store to do the experiment.
+	This experiment is made in Sunlab machine tethys.
+	-------------------------------------------------------------------------------------------------
+	When p of threads is range in(2, 3, 4):
+	relaxed:
+	csv, R=34, d=1, p=2, m=256, ops=4510595, time=1000003441, throughput=4510579
+	csv, R=34, d=1, p=3, m=256, ops=5271078, time=1000003223, throughput=5271061
+	csv, R=34, d=1, p=4, m=256, ops=5923844, time=1000004681, throughput=5923816
+	atomic:										(1000ops)
+	csv, R=34, d=1, p=2, m=256, ops=201092, time=1000018136, throughput=201088	latency = 4972947 
+	csv, R=34, d=1, p=3, m=256, ops=234838, time=1000027765, throughput=234831	latency = 4258381
+	csv, R=34, d=1, p=4, m=256, ops=256404, time=1000013064, throughput=256400	latency = 3900156
+	
+	When number of elements is range in(256, 1024, 4096):
+	relaxed:
+	csv, R=34, d=1, p=4, m=256, ops=5950888, time=1000004181, throughput=5950863
+	csv, R=34, d=1, p=4, m=4096, ops=6227676, time=1000004527, throughput=6227647
+	csv, R=34, d=1, p=4, m=1024, ops=6168346, time=1000002417, throughput=6168331
+	atomic:										(1000ops)
+	csv, R=34, d=1, p=4, m=256, ops=250775, time=1000030447, throughput=250767	latency = 3987765
+	csv, R=34, d=1, p=4, m=1024, ops=149560, time=1000051231, throughput=149552	latency = 6686637
+	csv, R=34, d=1, p=4, m=4096, ops=23646, time=1000152410, throughput=23642	latency = 42297605
+	--------------------------------------------------------------------------------------------------
+	
+	As we can see in the above graph, with the increase of threads, we can observe that the throughput is becoming bigger and the latency is smaller. For the increasing of element, the throughput is dramatically decreasing and the latency is increasing.
+	
+	We had successfully realized the atomic KV pair by using the string library designed by our own, which is contained in our folder 03_string/
+	Actually we had successfully compiled and run the relaxed code in both <int, int> pair and <string, int> pair, put them in TemplatedKV/ folder. But we faced with some problems in compiling the code using std::string at a few hours before this assignment is due. Even the <string, int> pair was compiled correctly and run well the day before due. It was so desperate.
+	
+	So we use the relaxed<int, int> pair to test its throughput and latency. Actually we know this is not true in comparing relaxed and atomic transaction code, but we still can have some useful conclusion because we had compiled and run the <string, int> pair correctly. 
+	
+	As tested before, we may conclude that the code using relaxed transaction have larger throughput and smaller latency than atomic code. So it may be more efficiently to use transaction relaxed than use atomic.
+	
+	
+	
+	
+	

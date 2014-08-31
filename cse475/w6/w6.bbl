@@ -1,0 +1,8 @@
+\begin{thebibliography}{1}
+
+\bibitem{emery2000Hoard}
+Robert D. Blumofe Paul R.~Wilson Emery D.~Berger, Kathryn S.~McKinley.
+\newblock {Hoard: A Scalable Memory Allocator for Multithreaded Applications}.
+\newblock {\em {ASPLOS}}, 2000.
+
+\end{thebibliography}
